@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <limits.h>
+
+#define MAX 10
+
+int m[MAX][MAX];  // cost table
+int s[MAX][MAX];  // bracket table
+
+// Function to print the optimal parenthesization
+void printOptimalParens(int i, int j) {
+    if (i == j)
+        printf("A%d", i);
+    else {
+        printf("(");
+        printOptimalParens(i, s[i][j]);
+        printOptimalParens(s[i][j] + 1, j);
+        printf(")");
+    }
+}
+
+int main() {
+    int p[MAX], n;
+
+    printf("Enter number of matrices: ");
+    scanf("%d", &n);
+
+    printf("Enter dimensions (p0 p1 ... p%d): ", n);
+    for (int i = 0; i <= n; i++)
+        scanf("%d", &p[i]);
+
+    // Initialize tables
+    for (int i = 1; i <= n; i++)
+        m[i][i] = 0;
+
+    for (int L = 2; L <= n; L++) {  // L is chain length
+        for (int i = 1; i <= n - L + 1; i++) {
+            int j = i + L - 1;
+            m[i][j] = INT_MAX;
+            for (int k = i; k < j; k++) {
+                int q = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
+                if (q < m[i][j]) {
+                    m[i][j] = q;
+                    s[i][j] = k;
+                }
+            }
+        }
+    }
+
+    printf("\nMinimum number of scalar multiplications: %d\n", m[1][n]);
+
+    // Print cost table (m)
+    printf("\nCost Table (m):\n");
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (i > j)
+                printf("   -   ");
+            else
+                printf("%6d ", m[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Print bracket table (s)
+    printf("\nBracket Table (s):\n");
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (i > j)
+                printf("   -   ");
+            else
+                printf("%6d ", s[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Print optimal parenthesization
+    printf("\nOptimal Parenthesization is: ");
+    printOptimalParens(1, n);
+    printf("\n");
+
+    return 0;
+}
